@@ -7,6 +7,7 @@ import akka.http.model.HttpRequest
 import akka.http.server._
 import akka.stream.ActorFlowMaterializer
 import akka.stream.scaladsl.Sink
+import arimitsu.sf.packetconsole.PropertyKey
 
 class Endpoint(components: {
   val system: ActorSystem
@@ -17,8 +18,8 @@ class Endpoint(components: {
   import system.dispatcher
 
   def start(): Unit = {
-    val host = System.getProperty("packet.console.host", "0.0.0.0")
-    val port = System.getProperty("packet.console.port", "51600").toInt
+    val host = System.getProperty(PropertyKey.PC_LISTEN_HOST, "0.0.0.0")
+    val port = System.getProperty(PropertyKey.PC_LISTEN_PORT, "51600").toInt
 
     implicit val routingLog = new RoutingLog() {
       override def log: LoggingAdapter = system.log
