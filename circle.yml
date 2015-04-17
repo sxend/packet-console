@@ -1,0 +1,8 @@
+machine:
+  java:
+    version: oraclejdk8
+deployment:
+  staging:
+    branch: master
+    commands:
+      - sbt compile package doc
