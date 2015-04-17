@@ -1,0 +1,9 @@
+target
+.history
+.idea/
+.idea_modules/
+*.iml
+.gradle/
+gradle/
+build/
+out/
