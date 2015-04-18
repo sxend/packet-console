@@ -54,7 +54,7 @@ class Endpoint(components: {
       reject
   }
 
-  private val credential = {
+  private lazy val credential = {
     Option(System.getProperty(PropertyKey.PC_API_CREDENTIAL)).getOrElse {
       throw new PacketConsoleException("credential property is required.")
     }
