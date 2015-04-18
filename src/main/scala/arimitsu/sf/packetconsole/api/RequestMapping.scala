@@ -3,6 +3,7 @@ package arimitsu.sf.packetconsole.api
 import akka.actor.ActorSystem
 import akka.http.model.StatusCodes._
 import akka.http.model._
+import akka.http.model.headers._
 import akka.http.server.Directives._
 import akka.http.server.Route
 import arimitsu.sf.packetconsole.PropertyKey
@@ -19,7 +20,7 @@ class RequestMapping(components: {
   def route: Route = validate {
     get {
       path("status")(complete(HttpResponse(OK, entity = "it works"))) ~
-        path("binds")(parameter('id)(bindsHandler.get)) ~
+        path("binds" / Rest)(bindsHandler.get) ~
         path("binds")(bindsHandler.list) ~
         path("protocols")(protocolsHandler.list) ~
         path("statistics")(statisticsHandler.get)
@@ -30,8 +31,10 @@ class RequestMapping(components: {
     }
   }
 
-  private def validate(f: => Route) = parameter('credential) {
-    case c if c == credential => pathPrefix("api")(f)
+  private def validate(r: => Route) = parameter('credential) {
+    case c if c == credential => pathPrefix("api") {
+      respondWithHeaders(Server("packet-console"))(r)
+    }
     case _ => reject
   }
 
