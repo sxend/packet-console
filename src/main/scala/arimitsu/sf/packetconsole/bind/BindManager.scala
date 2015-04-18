@@ -1,16 +1,15 @@
 package arimitsu.sf.packetconsole.bind
 
-import java.net.InetSocketAddress
 import java.util.UUID
 
-import akka.actor.{ActorRef, Actor, Props, ActorSystem}
-import arimitsu.sf.packetconsole.data.{Node, Bind}
-
+import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import scala.concurrent.duration._
+import arimitsu.sf.packetconsole.data.{Bind, Node}
+
 import scala.collection.mutable
 import scala.concurrent.Future
+import scala.concurrent.duration._
 
 class BindManager(components: {
   val system: ActorSystem
@@ -51,9 +50,10 @@ class BindManager(components: {
 
 private[bind] class BindManagementActor(components: {
 
-}) extends Actor {
+}) extends Actor with ActorLogging {
   private val bindMap = new mutable.HashMap[String, Bind]()
   private val actorMap = new mutable.HashMap[String, ActorRef]()
+
   override def receive = {
     case (protocol: String, from: Node, to: Node) => {
       protocol match {
@@ -74,7 +74,7 @@ private[bind] class BindManagementActor(components: {
       actorMap.remove(id) match {
         case Some(a) => a ! "stop"
       }
-      sender() ! ()
+      sender() !()
     case s@"statistics" =>
       sender() ! "statistics"
     case id: String =>
