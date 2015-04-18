@@ -31,11 +31,19 @@ class BindsHandler(components: {
     }
   }
 
-  def list = ???
+  def list = onComplete(bindManager.getBindList){
+    case util.Success(s) => complete(HttpResponse(OK, entity = s.toString))
+    case Failure(t) => failWith(t)
+  }
 
-  def delete(id: String) = complete(HttpResponse(OK, entity = "DELETE /api/binds/{id}"))
+  def delete(id: String) = {
+    onComplete(bindManager.unbound(id)) {
+      case util.Success(s) => complete(HttpResponse(OK, entity = s.toString))
+      case Failure(t) => failWith(t)
+    }
+  }
 
-  def register(protocol: String, from: String, to: String) = {
+  def register(protocol: String, from: String = "", to: String = "") = {
     val fromNode = {
       val arr = from.split(":")
       Node(arr.head, arr.last.toInt)

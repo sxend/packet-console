@@ -25,9 +25,9 @@ class RequestMapping(components: {
         path("protocols")(protocolsHandler.list) ~
         path("statistics")(statisticsHandler.get)
     } ~ put {
-      path("binds")(parameters('protocol, 'from, 'to)(bindsHandler.register))
+      path("binds" / Segment / Segment / Segment)(bindsHandler.register)
     } ~ delete {
-      path("binds")(parameter('id)(bindsHandler.delete))
+      path("binds" / Rest)(bindsHandler.delete)
     }
   }
 
