@@ -25,7 +25,7 @@ class BindManager(components: {
 
   lazy val managementActor = components.system.actorOf(Props(classOf[BindManagementActor], components))
 
-  def bind(protocol: String, from: InetSocketAddress, to: InetSocketAddress): Future[Bind] = {
+  def bind(protocol: String, from: Node, to: Node): Future[Bind] = {
     managementActor.ask((protocol, from, to)).mapTo[Bind]
   }
 

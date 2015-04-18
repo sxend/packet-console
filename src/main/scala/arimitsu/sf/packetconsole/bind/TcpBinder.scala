@@ -7,16 +7,17 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.io.{Tcp, IO}
 import Tcp._
 import akka.util.ByteString
+import arimitsu.sf.packetconsole.data.Node
 
-class TcpBinder(id: String, from: InetSocketAddress, to: InetSocketAddress) extends Actor {
+class TcpBinder(id: String, from: Node, to: Node) extends Actor {
 
   import context.system
 
-  IO(Tcp) ! Tcp.Bind(self, from)
+  IO(Tcp) ! Tcp.Bind(self, from.toInet)
 
   override def receive = {
     case Bound(localAddress) =>
-      context.system.log.info(s"starting: ${from.getHostName}:${from.getPort} -> ${to.getHostName}:${to.getPort}")
+      context.system.log.info(s"starting: ${from.host}:${from.port} -> ${to.host}:${to.port}")
     case CommandFailed(_: Bind) => context stop self
     case Connected(remote, local) =>
       val inbound = sender()
@@ -25,7 +26,7 @@ class TcpBinder(id: String, from: InetSocketAddress, to: InetSocketAddress) exte
   }
 }
 
-class Exchange(inbound: ActorRef, to: InetSocketAddress) extends Actor {
+class Exchange(inbound: ActorRef, to: Node) extends Actor {
   val outbound = context.actorOf(Props(classOf[Outbound], inbound, to))
 
   override def receive = {
@@ -35,9 +36,11 @@ class Exchange(inbound: ActorRef, to: InetSocketAddress) extends Actor {
   }
 }
 
-class Outbound(inbound: ActorRef, to: InetSocketAddress) extends Actor {
+class Outbound(inbound: ActorRef, to: Node) extends Actor {
+
   import context.system
-  IO(Tcp) ! Tcp.Connect(to)
+
+  IO(Tcp) ! Tcp.Connect(to.toInet)
 
   override def receive = {
     case CommandFailed(_: Bind) => context stop self

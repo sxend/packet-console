@@ -31,10 +31,22 @@ class BindsHandler(components: {
     }
   }
 
-  def list = complete(HttpResponse(OK, entity = "GET /api/binds"))
+  def list = ???
 
   def delete(id: String) = complete(HttpResponse(OK, entity = "DELETE /api/binds/{id}"))
 
-  def register(protocol: String, from: String, to: String) = complete(HttpResponse(OK, entity = "PUT /api/binds/{protocol}/{from_host}:{from_port}/{to_host}:{to_port}"))
-
+  def register(protocol: String, from: String, to: String) = {
+    val fromNode = {
+      val arr = from.split(":")
+      Node(arr.head, arr.last.toInt)
+    }
+    val toNode = {
+      val arr = to.split(":")
+      Node(arr.head, arr.last.toInt)
+    }
+    onComplete(bindManager.bind(protocol, fromNode, toNode)) {
+      case util.Success(s) => complete(HttpResponse(OK, entity = s.toString))
+      case Failure(t) => failWith(t)
+    }
+  }
 }
