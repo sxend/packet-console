@@ -10,7 +10,7 @@ trait Components {
   lazy val bindsHandler: BindsHandler = new BindsHandler(this)
   lazy val protocolsHandler: ProtocolsHandler = new ProtocolsHandler(this)
   lazy val statisticsHandler: StatisticsHandler = new StatisticsHandler(this)
-  lazy val route: Route = new RequestMapping(this).route
+  lazy val requestMapping: RequestMapping = new RequestMapping(this)
   lazy val endpoint: Endpoint = new Endpoint(this)
   lazy val bindManager: BindManager = new BindManager(this)
 }

@@ -4,19 +4,22 @@ import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
 import akka.http._
 import akka.http.model.HttpRequest
+import akka.http.model.headers.Server
+import akka.http.server.Directives._
 import akka.http.server._
 import akka.stream.ActorFlowMaterializer
-import akka.stream.scaladsl.Sink
-import arimitsu.sf.packetconsole.PropertyKey
-import arimitsu.sf.packetconsole.bind.BindManager
+import akka.stream.scaladsl.Sink._
+import arimitsu.sf.packetconsole.{PacketConsoleException, PropertyKey}
 
 class Endpoint(components: {
   val system: ActorSystem
-  val route: Route
+  val requestMapping: RequestMapping
 }) {
   implicit val system = components.system
+  lazy val route = components.requestMapping.route
 
   import system.dispatcher
+
 
   def start(): Unit = {
     val host = System.getProperty(PropertyKey.PC_LISTEN_HOST, "0.0.0.0")
@@ -32,10 +35,28 @@ class Endpoint(components: {
     implicit val setup = RoutingSetup.apply
     val server = Http(components.system).bind(interface = host, port = port)
     server.to {
-      Sink.foreach { connection =>
-        connection.handleWithAsyncHandler(Route.asyncHandler(components.route))
+      foreach { connection =>
+        connection.handleWithAsyncHandler(Route.asyncHandler {
+          validate {
+            route
+          }
+        })
       }
     }.run()
   }
 
+  private def validate(r: => Route) = parameter('credential) {
+    case c if c == credential => pathPrefix("api") {
+      respondWithHeaders(Server("packet-console"))(r)
+    }
+    case any: Any =>
+      system.log.info(s"invalid credential message: $any")
+      reject
+  }
+
+  private val credential = {
+    Option(System.getProperty(PropertyKey.PC_API_CREDENTIAL)).getOrElse {
+      throw new PacketConsoleException("credential property is required.")
+    }
+  }
 }
