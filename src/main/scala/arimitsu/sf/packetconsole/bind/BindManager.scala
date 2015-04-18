@@ -51,6 +51,7 @@ class BindManager(components: {
 private[bind] class BindManagementActor(components: {
 
 }) extends Actor with ActorLogging {
+  import Binder.Protocol._
   private val bindMap = new mutable.HashMap[String, Bind]()
   private val actorMap = new mutable.HashMap[String, ActorRef]()
 
@@ -72,7 +73,7 @@ private[bind] class BindManagementActor(components: {
     case ("delete", id: String) =>
       bindMap.remove(id)
       actorMap.remove(id) match {
-        case Some(a) => a ! "stop"
+        case Some(a) => a ! Stop
       }
       sender() !()
     case s@"statistics" =>

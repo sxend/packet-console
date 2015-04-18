@@ -8,6 +8,7 @@ import arimitsu.sf.packetconsole.data.Node
 
 class TcpBinder(id: String, from: Node, to: Node) extends Actor with ActorLogging {
 
+  import Binder.Protocol._
   import context.system
 
   IO(Tcp) ! Tcp.Bind(self, from.toInet)
@@ -21,8 +22,8 @@ class TcpBinder(id: String, from: Node, to: Node) extends Actor with ActorLoggin
       val exchange = context.actorOf(Props(classOf[Exchange], inbound, to))
       inbound ! Register(exchange)
       context.become {
-        case "stop" =>
-          exchange ! "stop"
+        case Stop =>
+          exchange ! Stop
           context stop self
       }
     case any: Any => throw new UnsupportedOperationException(s"unknown message : $any")
@@ -30,14 +31,17 @@ class TcpBinder(id: String, from: Node, to: Node) extends Actor with ActorLoggin
 }
 
 class Exchange(inbound: ActorRef, to: Node) extends Actor with ActorLogging {
+
+  import Binder.Protocol._
+
   val outbound = context.actorOf(Props(classOf[Outbound], inbound, to))
 
   override def receive = {
     case Received(data) => outbound ! data
     case data: ByteString => inbound ! Write(data)
     case PeerClosed => context stop self
-    case "stop" =>
-      outbound ! "stop"
+    case Stop =>
+      outbound ! Stop
       context stop self
     case any: Any => throw new UnsupportedOperationException(s"unknown message : $any")
   }
@@ -45,6 +49,7 @@ class Exchange(inbound: ActorRef, to: Node) extends Actor with ActorLogging {
 
 class Outbound(inbound: ActorRef, to: Node) extends Actor with ActorLogging {
 
+  import Binder.Protocol._
   import context.system
 
   IO(Tcp) ! Tcp.Connect(to.toInet)
@@ -57,7 +62,7 @@ class Outbound(inbound: ActorRef, to: Node) extends Actor with ActorLogging {
       context.become {
         case Received(data) => inbound ! data
         case data: ByteString => outbound ! Write(data)
-        case "stop" => context stop self
+        case Stop => context stop self
         case any: Any => throw new UnsupportedOperationException(s"unknown message : $any")
       }
   }
