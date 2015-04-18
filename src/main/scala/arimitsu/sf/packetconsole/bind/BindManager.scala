@@ -5,7 +5,8 @@ import java.util.UUID
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import arimitsu.sf.packetconsole.PacketConsoleException
+import arimitsu.sf.packetconsole.{Protocol, PacketConsoleException}
+import arimitsu.sf.packetconsole.Protocol.{UDP, TCP}
 import arimitsu.sf.packetconsole.data.{Bind, Node}
 
 import scala.collection.mutable
@@ -52,44 +53,57 @@ class BindManager(components: {
 private[bind] class BindManagementActor(components: {
 
 }) extends Actor with ActorLogging {
-  import Binder.Protocol._
-  private val bindMap = new mutable.HashMap[String, Bind]()
-  private val actorMap = new mutable.HashMap[String, ActorRef]()
+
+  import Binder.Message._
+  import BindManagementActor.Message._
+  private val bindings = new mutable.HashMap[String, Bind]()
+  private val actors = new mutable.HashMap[String, ActorRef]()
 
   override def receive = {
-    case (protocol: String, from: Node, to: Node) => {
+    case Get(id) => sender() ! bindings.get(id)
+    case List => sender() ! bindings.values.toList
+    case Register(protocol, from, to) => {
       protocol match {
-        case p@"tcp" =>
+        case TCP =>
           val id = UUID.randomUUID().toString
           val actor = context.actorOf(Props(classOf[TcpBinder], id, from, to))
-          val bind = Bind(id, p, from, to)
-          bindMap.put(id, bind)
-          actorMap.put(id, actor)
+          val bind = Bind(id, TCP, from, to)
+          bindings.put(id, bind)
+          actors.put(id, actor)
           sender() ! bind
-        case any: Any => throw new PacketConsoleException(s"unknown message $any")
+        case any: Any => throw new PacketConsoleException(s"unsupported protocol $any")
       }
     }
-    case "list" =>
-      sender() ! bindMap.values.toList
-    case ("delete", id: String) =>
-      bindMap.remove(id)
-      actorMap.remove(id) match {
+
+    case Delete(id) =>
+      bindings.remove(id)
+      actors.remove(id) match {
         case Some(a) => a ! Stop
       }
       sender() !()
-    case s@"statistics" =>
+    case Statistics =>
       sender() ! "statistics"
-    case id: String =>
-      sender() ! bindMap.get(id)
+
     case any: Any => throw new PacketConsoleException(s"unknown message $any")
   }
 }
+
 object BindManagementActor {
-  object Protocol {
-    case object List
+
+  object Message {
+
+    case object Protocols
+
     case object Statistics
+
+    case object List
+
     case class Delete(id: String)
+
     case class Get(id: String)
-    case class Register(protocol: String, from: Node, to: Node)
+
+    case class Register(protocol: Protocol, from: Node, to: Node)
+
   }
+
 }

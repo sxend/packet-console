@@ -9,7 +9,7 @@ import arimitsu.sf.packetconsole.data.Node
 
 class TcpBinder(id: String, from: Node, to: Node) extends Actor with ActorLogging {
 
-  import Binder.Protocol._
+  import Binder.Message._
   import context.system
 
   IO(Tcp) ! Tcp.Bind(self, from.toInet)
@@ -33,7 +33,7 @@ class TcpBinder(id: String, from: Node, to: Node) extends Actor with ActorLoggin
 
 class Exchange(inbound: ActorRef, to: Node) extends Actor with ActorLogging {
 
-  import Binder.Protocol._
+  import Binder.Message._
 
   val outbound = context.actorOf(Props(classOf[Outbound], inbound, to))
 
@@ -50,7 +50,7 @@ class Exchange(inbound: ActorRef, to: Node) extends Actor with ActorLogging {
 
 class Outbound(inbound: ActorRef, to: Node) extends Actor with ActorLogging {
 
-  import Binder.Protocol._
+  import Binder.Message._
   import context.system
 
   IO(Tcp) ! Tcp.Connect(to.toInet)

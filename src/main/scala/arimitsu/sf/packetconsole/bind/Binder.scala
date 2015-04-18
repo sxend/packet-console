@@ -4,7 +4,7 @@ class Binder {
 
 }
 object Binder {
-  object Protocol {
+  object Message {
     case object Stop
   }
 }

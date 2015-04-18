@@ -6,7 +6,7 @@ import akka.http.server.Directives._
 import akka.http.server.Route
 import arimitsu.sf.packetconsole.bind.BindManager
 import arimitsu.sf.packetconsole.data.{Node, Bind}
-import arimitsu.sf.packetconsole.api.Protocol._
+import arimitsu.sf.packetconsole.api.JsonFormats._
 import spray.json.DefaultJsonProtocol._
 import akka.http.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.marshalling.ToResponseMarshallable
