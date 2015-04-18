@@ -4,7 +4,7 @@ import java.net.InetSocketAddress
 import java.util.UUID
 
 import akka.actor.{Actor, Props, ActorSystem}
-import arimitsu.sf.packetconsole.data.Bind
+import arimitsu.sf.packetconsole.data.{Node, Bind}
 
 import akka.pattern.ask
 import akka.util.Timeout
@@ -50,7 +50,7 @@ private[bind] class BindManagementActor(components: {
   private val bindMap = new mutable.HashMap[String, Bind]()
 
   override def receive = {
-    case (protocol: String, from: InetSocketAddress, to: InetSocketAddress) => {
+    case (protocol: String, from: Node, to: Node) => {
       protocol match {
         case p@"tcp" =>
           val id = UUID.randomUUID().toString
