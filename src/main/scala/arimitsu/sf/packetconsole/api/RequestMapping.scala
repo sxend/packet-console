@@ -41,9 +41,8 @@ class RequestMapping(components: {
   }
 
   private val credential = {
-    Option(System.getProperty(PropertyKey.PC_API_CREDENTIAL)) match {
-      case Some(c) => c
-      case None => throw new PacketConsoleException("credential property is required.")
+    Option(System.getProperty(PropertyKey.PC_API_CREDENTIAL)).getOrElse {
+      throw new PacketConsoleException("credential property is required.")
     }
   }
 
