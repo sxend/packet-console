@@ -9,46 +9,44 @@ import Tcp._
 import akka.util.ByteString
 
 class TcpBinder(from: InetSocketAddress, to: InetSocketAddress) extends Actor {
+
   import context.system
+
   IO(Tcp) ! Tcp.Bind(self, from)
 
   override def receive = {
-    case b@Bound(localAddress) =>
+    case Bound(localAddress) =>
       context.system.log.info(s"starting: ${from.getHostName}:${from.getPort} -> ${to.getHostName}:${to.getPort}")
-    case c@Connected(remote, local) =>
-      val connection = sender()
-      val inbound = context.actorOf(Props(classOf[Inbound], to, connection))
-      connection ! Register(inbound)
+    case CommandFailed(_: Bind) => context stop self
+    case Connected(remote, local) =>
+      val inbound = sender()
+      val exchange = context.actorOf(Props(classOf[Exchange], inbound, to))
+      inbound ! Register(exchange)
   }
 }
-class Inbound(to: InetSocketAddress, connection: ActorRef) extends Actor{
-  import context.system
+
+class Exchange(inbound: ActorRef, to: InetSocketAddress) extends Actor {
+  val outbound = context.actorOf(Props(classOf[Outbound], inbound, to))
+
+  override def receive = {
+    case Received(data) => outbound ! data
+    case data: ByteString => inbound ! Write(data)
+    case PeerClosed => context stop self
+  }
+}
+
+class Outbound(inbound: ActorRef, to: InetSocketAddress) extends Actor {
   IO(Tcp) ! Tcp.Connect(to)
+
   override def receive = {
     case CommandFailed(_: Bind) => context stop self
-    case PeerClosed     => context stop self
-    case c @ Connected(remote, local) =>
-      val outbound = context.actorOf(Props(classOf[Outbound], connection))
-      connection ! Register(self)
-      context become {
-        case data: ByteString =>
-          outbound ! Write(data)
-        case CommandFailed(w: Write) =>
-          context stop self
-        case Received(data) =>
-          outbound ! data
-        case "close" =>
-          connection ! Close
-        case _: ConnectionClosed =>
-          context stop self
+    case Connected(remote, local) =>
+      val outbound = sender()
+      outbound ! Register(self)
+      context.become {
+        case Received(data) => inbound ! data
+        case data: ByteString => outbound ! Write(data)
       }
-  }
-}
-class Outbound(connection: ActorRef) extends Actor{
-  override def receive = {
-    case CommandFailed(_: Bind) => context stop self
-    case PeerClosed     => context stop self
-    case Received(data) => connection ! data
   }
 }
 
