@@ -8,4 +8,9 @@ object Protocol {
 
   case object UDP extends Protocol("udp")
 
+  val list = List(TCP, UDP)
+
+  def valueOf(proto: String): Protocol = {
+    list.find(_.name == proto).get
+  }
 }

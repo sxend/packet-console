@@ -5,9 +5,10 @@ import java.util.UUID
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
-import arimitsu.sf.packetconsole.{Protocol, PacketConsoleException}
-import arimitsu.sf.packetconsole.Protocol.{UDP, TCP}
+import arimitsu.sf.packetconsole.Protocol.TCP
+import arimitsu.sf.packetconsole.bind.BindManagementActor.Message
 import arimitsu.sf.packetconsole.data.{Bind, Node}
+import arimitsu.sf.packetconsole.{PacketConsoleException, Protocol}
 
 import scala.collection.mutable
 import scala.concurrent.Future
@@ -16,10 +17,9 @@ import scala.concurrent.duration._
 class BindManager(components: {
   val system: ActorSystem
 }) {
+  import Message._
 
   implicit val timeout = Timeout(3 seconds)
-
-  private val protocols = Array("tcp", "udp")
 
   def start() = {
     managementActor
@@ -27,35 +27,36 @@ class BindManager(components: {
 
   lazy val managementActor = components.system.actorOf(Props(classOf[BindManagementActor], components))
 
-  def bind(protocol: String, from: Node, to: Node): Future[Bind] = {
-    managementActor.ask((protocol, from, to)).mapTo[Bind]
+  def bind(protocol: Protocol, from: Node, to: Node): Future[Bind] = {
+    managementActor.ask(Register(protocol, from, to)).mapTo[Bind]
   }
 
   def getBind(id: String): Future[Option[Bind]] = {
-    managementActor.ask(id).mapTo[Option[Bind]]
+    managementActor.ask(Get(id)).mapTo[Option[Bind]]
   }
 
   def getBindList: Future[List[Bind]] = {
-    managementActor.ask("list").mapTo[List[Bind]]
+    managementActor.ask(Message.List).mapTo[List[Bind]]
   }
 
   def statistics: Future[String] = {
-    managementActor.ask("statistics").mapTo[String]
+    managementActor.ask(Statistics).mapTo[String]
   }
 
   def unbound(id: String): Future[Unit] = {
-    managementActor.ask(("delete", id)).mapTo[Unit]
+    managementActor.ask(Delete(id)).mapTo[Unit]
   }
 
-  def supportedProtocols: Array[String] = protocols
+  def supportedProtocols: List[String] = Protocol.list.map(_.name)
 }
 
 private[bind] class BindManagementActor(components: {
 
 }) extends Actor with ActorLogging {
 
-  import Binder.Message._
   import BindManagementActor.Message._
+  import Binder.Message._
+
   private val bindings = new mutable.HashMap[String, Bind]()
   private val actors = new mutable.HashMap[String, ActorRef]()
 
@@ -91,8 +92,6 @@ private[bind] class BindManagementActor(components: {
 object BindManagementActor {
 
   object Message {
-
-    case object Protocols
 
     case object Statistics
 

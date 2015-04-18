@@ -4,6 +4,7 @@ import akka.http.model.HttpResponse
 import akka.http.model.StatusCodes._
 import akka.http.server.Directives._
 import akka.http.server.Route
+import arimitsu.sf.packetconsole.Protocol
 import arimitsu.sf.packetconsole.bind.BindManager
 import arimitsu.sf.packetconsole.data.{Node, Bind}
 import arimitsu.sf.packetconsole.api.JsonFormats._
@@ -43,16 +44,17 @@ class BindsHandler(components: {
     }
   }
 
-  def register(protocol: String, from: String = "", to: String = "") = {
-    val fromNode = {
-      val arr = from.split(":")
+  def register(proto: String, f: String = "", t: String = "") = {
+    val from = {
+      val arr = f.split(":")
       Node(arr.head, arr.last.toInt)
     }
-    val toNode = {
-      val arr = to.split(":")
+    val to = {
+      val arr = t.split(":")
       Node(arr.head, arr.last.toInt)
     }
-    onComplete(bindManager.bind(protocol, fromNode, toNode)) {
+    val protocol = Protocol.valueOf(proto)
+    onComplete(bindManager.bind(protocol, from, to)) {
       case util.Success(s) => complete(HttpResponse(OK, entity = s.toString))
       case Failure(t) => failWith(t)
     }
