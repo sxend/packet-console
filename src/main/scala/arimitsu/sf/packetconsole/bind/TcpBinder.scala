@@ -8,7 +8,7 @@ import akka.io.{Tcp, IO}
 import Tcp._
 import akka.util.ByteString
 
-class TcpBinder(from: InetSocketAddress, to: InetSocketAddress) extends Actor {
+class TcpBinder(id: String, from: InetSocketAddress, to: InetSocketAddress) extends Actor {
 
   import context.system
 
@@ -36,6 +36,7 @@ class Exchange(inbound: ActorRef, to: InetSocketAddress) extends Actor {
 }
 
 class Outbound(inbound: ActorRef, to: InetSocketAddress) extends Actor {
+  import context.system
   IO(Tcp) ! Tcp.Connect(to)
 
   override def receive = {

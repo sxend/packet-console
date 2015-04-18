@@ -1,4 +1,4 @@
-package arimitsu.sf.packetconsole.api.data
+package arimitsu.sf.packetconsole.data
 
 import java.net.InetSocketAddress
 

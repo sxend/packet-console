@@ -10,5 +10,6 @@ object Bootstrap {
 class Bootstrap(components: Components) {
   def run(): Unit = {
     components.endpoint.start()
+    components.bindManager.start()
   }
 }

@@ -22,7 +22,7 @@ class RequestMapping(components: {
         path("binds")(parameter('id)(bindsHandler.get)) ~
         path("binds")(bindsHandler.list) ~
         path("protocols")(protocolsHandler.list) ~
-        path("statistics")(statisticsHandler.list)
+        path("statistics")(statisticsHandler.get)
     } ~ put {
       path("binds")(parameters('protocol, 'from, 'to)(bindsHandler.register))
     } ~ delete {

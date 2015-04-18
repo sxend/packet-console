@@ -8,6 +8,7 @@ import akka.http.server._
 import akka.stream.ActorFlowMaterializer
 import akka.stream.scaladsl.Sink
 import arimitsu.sf.packetconsole.PropertyKey
+import arimitsu.sf.packetconsole.bind.BindManager
 
 class Endpoint(components: {
   val system: ActorSystem

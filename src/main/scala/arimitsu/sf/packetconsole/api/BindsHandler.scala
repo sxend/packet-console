@@ -4,7 +4,7 @@ import akka.http.model.HttpResponse
 import akka.http.model.StatusCodes._
 import akka.http.server.Directives._
 import akka.http.server.Route
-import arimitsu.sf.packetconsole.api.data.Bind
+import arimitsu.sf.packetconsole.data.Bind
 
 class BindsHandler(components: {
 
