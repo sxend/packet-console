@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.io.Tcp._
 import akka.io.{IO, Tcp}
 import akka.util.ByteString
+import arimitsu.sf.packetconsole.PacketConsoleException
 import arimitsu.sf.packetconsole.data.Node
 
 class TcpBinder(id: String, from: Node, to: Node) extends Actor with ActorLogging {
@@ -26,7 +27,7 @@ class TcpBinder(id: String, from: Node, to: Node) extends Actor with ActorLoggin
           exchange ! Stop
           context stop self
       }
-    case any: Any => throw new UnsupportedOperationException(s"unknown message : $any")
+    case any: Any => throw new PacketConsoleException(s"unknown message : $any")
   }
 }
 
@@ -43,7 +44,7 @@ class Exchange(inbound: ActorRef, to: Node) extends Actor with ActorLogging {
     case Stop =>
       outbound ! Stop
       context stop self
-    case any: Any => throw new UnsupportedOperationException(s"unknown message : $any")
+    case any: Any => throw new PacketConsoleException(s"unknown message : $any")
   }
 }
 
@@ -63,7 +64,7 @@ class Outbound(inbound: ActorRef, to: Node) extends Actor with ActorLogging {
         case Received(data) => inbound ! data
         case data: ByteString => outbound ! Write(data)
         case Stop => context stop self
-        case any: Any => throw new UnsupportedOperationException(s"unknown message : $any")
+        case any: Any => throw new PacketConsoleException(s"unknown message : $any")
       }
   }
 }

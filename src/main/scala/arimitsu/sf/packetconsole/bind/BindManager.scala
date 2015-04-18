@@ -5,6 +5,7 @@ import java.util.UUID
 import akka.actor._
 import akka.pattern.ask
 import akka.util.Timeout
+import arimitsu.sf.packetconsole.PacketConsoleException
 import arimitsu.sf.packetconsole.data.{Bind, Node}
 
 import scala.collection.mutable
@@ -65,7 +66,7 @@ private[bind] class BindManagementActor(components: {
           bindMap.put(id, bind)
           actorMap.put(id, actor)
           sender() ! bind
-        case a: Any => throw new UnsupportedOperationException(s"unknown message $a")
+        case any: Any => throw new PacketConsoleException(s"unknown message $any")
       }
     }
     case "list" =>
@@ -80,7 +81,7 @@ private[bind] class BindManagementActor(components: {
       sender() ! "statistics"
     case id: String =>
       sender() ! bindMap.get(id)
-    case any: Any => throw new UnsupportedOperationException(s"unknown message $any")
+    case any: Any => throw new PacketConsoleException(s"unknown message $any")
   }
 }
 object BindManagementActor {
