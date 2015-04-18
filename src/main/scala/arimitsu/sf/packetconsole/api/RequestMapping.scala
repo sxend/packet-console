@@ -6,7 +6,7 @@ import akka.http.model._
 import akka.http.model.headers._
 import akka.http.server.Directives._
 import akka.http.server.Route
-import arimitsu.sf.packetconsole.PropertyKey
+import arimitsu.sf.packetconsole.{PacketConsoleException, PropertyKey}
 
 class RequestMapping(components: {
   val system: ActorSystem
@@ -35,16 +35,15 @@ class RequestMapping(components: {
     case c if c == credential => pathPrefix("api") {
       respondWithHeaders(Server("packet-console"))(r)
     }
-    case _ => reject
+    case any: Any =>
+      system.log.info(s"invalid credential message: $any")
+      reject
   }
 
   private val credential = {
     Option(System.getProperty(PropertyKey.PC_API_CREDENTIAL)) match {
       case Some(c) => c
-      case None =>
-        val e = new RuntimeException("credential option is require!!!")
-        system.log.error(e, "")
-        throw e
+      case None => throw new PacketConsoleException("credential property is required.")
     }
   }
 

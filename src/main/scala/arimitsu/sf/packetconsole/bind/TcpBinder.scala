@@ -25,7 +25,7 @@ class TcpBinder(id: String, from: Node, to: Node) extends Actor with ActorLoggin
           exchange ! "stop"
           context stop self
       }
-    case _ => throw new UnsupportedOperationException("unknown message")
+    case any: Any => throw new UnsupportedOperationException(s"unknown message : $any")
   }
 }
 
@@ -39,7 +39,7 @@ class Exchange(inbound: ActorRef, to: Node) extends Actor with ActorLogging {
     case "stop" =>
       outbound ! "stop"
       context stop self
-    case _ => throw new UnsupportedOperationException("unknown message")
+    case any: Any => throw new UnsupportedOperationException(s"unknown message : $any")
   }
 }
 
@@ -58,7 +58,7 @@ class Outbound(inbound: ActorRef, to: Node) extends Actor with ActorLogging {
         case Received(data) => inbound ! data
         case data: ByteString => outbound ! Write(data)
         case "stop" => context stop self
-        case a: Any => throw new UnsupportedOperationException(s"unknown message $a")
+        case any: Any => throw new UnsupportedOperationException(s"unknown message : $any")
       }
   }
 }
