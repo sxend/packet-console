@@ -80,6 +80,15 @@ private[bind] class BindManagementActor(components: {
       sender() ! "statistics"
     case id: String =>
       sender() ! bindMap.get(id)
-    case a: Any => throw new UnsupportedOperationException(s"unknown message $a")
+    case any: Any => throw new UnsupportedOperationException(s"unknown message $any")
+  }
+}
+object BindManagementActor {
+  object Protocol {
+    case object List
+    case object Statistics
+    case class Delete(id: String)
+    case class Get(id: String)
+    case class Register(protocol: String, from: Node, to: Node)
   }
 }
