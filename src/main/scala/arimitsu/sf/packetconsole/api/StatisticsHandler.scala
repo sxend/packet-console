@@ -1,8 +1,8 @@
 package arimitsu.sf.packetconsole.api
 
-import akka.http.model.HttpResponse
-import akka.http.model.StatusCodes._
-import akka.http.server.Directives._
+import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.server.Directives._
 import arimitsu.sf.packetconsole.bind.BindManager
 
 import scala.util.Failure

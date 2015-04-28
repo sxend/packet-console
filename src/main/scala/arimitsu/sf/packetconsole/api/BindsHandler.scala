@@ -1,16 +1,16 @@
 package arimitsu.sf.packetconsole.api
 
-import akka.http.model.HttpResponse
-import akka.http.model.StatusCodes._
-import akka.http.server.Directives._
-import akka.http.server.Route
+import akka.http.scaladsl.model.HttpResponse
+import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 import arimitsu.sf.packetconsole.Protocol
 import arimitsu.sf.packetconsole.bind.BindManager
 import arimitsu.sf.packetconsole.data.{Node, Bind}
 import arimitsu.sf.packetconsole.api.JsonFormats._
 import spray.json.DefaultJsonProtocol._
-import akka.http.marshallers.sprayjson.SprayJsonSupport._
-import akka.http.marshalling.ToResponseMarshallable
+import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import akka.http.scaladsl.marshalling.ToResponseMarshallable
 import spray.json.JsObject
 
 import scala.concurrent.Future

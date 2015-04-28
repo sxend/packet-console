@@ -2,11 +2,11 @@ package arimitsu.sf.packetconsole.api
 
 import akka.actor.ActorSystem
 import akka.event.LoggingAdapter
-import akka.http._
-import akka.http.model.HttpRequest
-import akka.http.model.headers.Server
-import akka.http.server.Directives._
-import akka.http.server._
+import akka.http.scaladsl._
+import akka.http.scaladsl.model.HttpRequest
+import akka.http.scaladsl.model.headers.Server
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server._
 import akka.stream.ActorFlowMaterializer
 import akka.stream.scaladsl.Sink._
 import arimitsu.sf.packetconsole.{PacketConsoleException, PropertyKey}

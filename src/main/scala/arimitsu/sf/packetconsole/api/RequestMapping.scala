@@ -1,10 +1,10 @@
 package arimitsu.sf.packetconsole.api
 
 import akka.actor.ActorSystem
-import akka.http.model.StatusCodes._
-import akka.http.model._
-import akka.http.server.Directives._
-import akka.http.server.Route
+import akka.http.scaladsl.model.StatusCodes._
+import akka.http.scaladsl.model._
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Route
 
 class RequestMapping(components: {
   val system: ActorSystem

@@ -1,7 +1,7 @@
 package arimitsu.sf.packetconsole
 
 import akka.actor.ActorSystem
-import akka.http.server.Route
+import akka.http.scaladsl.server.Route
 import arimitsu.sf.packetconsole.api._
 import arimitsu.sf.packetconsole.bind.BindManager
 
